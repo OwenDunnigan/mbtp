@@ -101,6 +101,10 @@ h2 {
   .bottom {
     padding: 20% 0 0 0;
   }
+  nav {
+    justify-self: anchor-center;
+    padding-left: 0%;
+  }
   nav .directions {
     position-area: center;
     padding: 5px 10px;
