@@ -60,13 +60,7 @@ nav a {
   background: linear-gradient(135deg, #170826, #140840);
   position: relative;
   bottom: -100vh;
-  text-align: center;
-  padding: 20% 20% 0% 20%;
-  height: 100vh;
-}
-.bottom img {
-  max-inline-size: 16vmax;
-  padding: 2%;
+  padding: 30% 0% 0% 0%;
 }
 
 h2 {
@@ -115,5 +109,36 @@ h2 {
   }
   nav a {
     border-top: ridge 1px;
+  }
+  .taiz {
+    width: 90vw;
+    right: 42px;
+    position: relative;
+    padding-bottom: 10%;
+  }
+  .pine {
+    width: 85vw;
+    float: right;
+    padding-bottom: 6%;
+    position: relative;
+    left: 30px;
+  }
+  .col {
+    width: 80vw;
+    position: relative;
+    left: 22px;
+  }
+  img {
+    max-inline-size: inherit;
+  }
+}
+@media (min-width: 900px) {
+  .bottom {
+    text-align: center;
+    padding: 10% 0 15% 0;
+  }
+  .bottom img {
+    max-inline-size: 24vmax;
+    padding: 0 2%;
   }
 }/*# sourceMappingURL=main.css.map */
