@@ -5,9 +5,10 @@ html, body {
 }
 
 h1 {
-  color: red;
+  color: rgba(31, 58, 77, 0.97);
   position-area: center;
   position: absolute;
+  font-size: 7em;
 }
 
 nav {
@@ -21,7 +22,7 @@ nav .directions {
   margin-right: 17%;
 }
 nav a {
-  padding: 1% 0px;
+  padding: 2px 0px;
   text-decoration: none;
   color: inherit;
   font-size: 1em;
@@ -56,10 +57,16 @@ nav a {
 }
 
 .bottom {
-  height: 100vh;
-  background: white;
+  background: linear-gradient(135deg, #170826, #140840);
   position: relative;
   bottom: -100vh;
+  text-align: center;
+  padding: 20% 20% 0% 20%;
+  height: 100vh;
+}
+.bottom img {
+  max-inline-size: 16vmax;
+  padding: 2%;
 }
 
 h2 {
@@ -94,9 +101,14 @@ h2 {
 }
 
 @media (max-width: 900px) {
+  h1 {
+    z-index: -1;
+  }
+  .bottom {
+    padding: 20% 0 0 0;
+  }
   nav .directions {
     position-area: center;
-    bottom: -15%;
     padding: 5px 10px;
     border: solid 2px;
     margin: 0px;
