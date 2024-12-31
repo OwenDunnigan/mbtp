@@ -8,7 +8,7 @@ h1 {
   color: rgba(31, 58, 77, 0.97);
   position-area: center;
   position: absolute;
-  font-size: 7em;
+  font-size: clamp(5em, 34vw, 7em);
 }
 
 nav {
@@ -113,6 +113,11 @@ h2 {
   }
   nav a {
     border-top: ridge 1px;
+  }
+  .instagram {
+    right: 0px;
+    position-area: bottom right;
+    padding-right: 2.5%;
   }
   .taiz {
     width: 90vw;
