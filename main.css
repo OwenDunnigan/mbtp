@@ -46,7 +46,7 @@ nav a {
   z-index: -1;
 }
 
-.instagram {
+.arrow {
   position: absolute;
   position-area: center bottom;
   bottom: 0px;
@@ -54,6 +54,16 @@ nav a {
   font-size: 1em;
   text-decoration: none;
   color: inherit;
+  width: 2.5vmax;
+}
+
+.instagram {
+  bottom: 4%;
+  position: absolute;
+  right: 6%;
+  color: white;
+  font-size: 1.5em;
+  text-decoration: none;
 }
 
 .bottom {
@@ -114,10 +124,11 @@ h2 {
   nav a {
     border-top: ridge 1px;
   }
-  .instagram {
+  .arrow {
     right: 0px;
     position-area: bottom right;
     padding-right: 2.5%;
+    width: 6vmax;
   }
   .taiz {
     width: 90vw;
