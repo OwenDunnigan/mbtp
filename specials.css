@@ -17,6 +17,7 @@ h1 {
   animation-timeline: scroll(root);
   animation-range: entry 0% cover 100%;
   animation-name: fadeToGrey;
+  z-index: -1;
 }
 
 #space {
@@ -39,12 +40,28 @@ h1 {
   display: grid;
 }
 .flex h2 {
+  font-size: 7rem;
   display: inline;
 }
 .flex .card {
   padding: 2%;
   margin: 5%;
   background: grey;
+}
+.flex .card img {
+  float: right;
+  width: 50%;
+}
+.flex .card h2 {
+  font-size: 7rem;
+  width: 50%;
+  display: inline-block;
+  word-break: break-all;
+  margin: 0;
+}
+.flex .card p {
+  margin: 0;
+  font-size: 2rem;
 }
 .flex .block {
   padding: 2%;

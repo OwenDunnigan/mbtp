@@ -16,6 +16,7 @@ h1
     animation-timeline: scroll(root)
     animation-range: entry 0% cover 100%
     animation-name: fadeToGrey
+    z-index: -1
 
 #space
   height: 100vh
@@ -37,13 +38,27 @@ h1
     
 
     h2 
+        font-size: 7rem
         display: inline
 
     .card
         padding: 2%
         margin: 5%
         background: grey
-    
+
+        img
+            float: right
+            width: 50%
+        h2
+            font-size: 7rem
+            width: 50%
+            display: inline-block
+            word-break: break-all
+            margin: 0
+        p
+            margin: 0
+            font-size: 2rem
+
     .block
         padding: 2%
         margin: 5%
