@@ -1,0 +1,164 @@
+html, body {
+  margin: 0;
+  color: white;
+  font-size: 22px;
+}
+
+h1 {
+  color: rgba(31, 58, 77, 0.97);
+  position-area: center;
+  position: absolute;
+  font-size: clamp(5em, 34vw, 7em);
+}
+
+nav {
+  position: fixed;
+  padding-left: 17%;
+  padding-top: 2.5%;
+}
+nav .directions {
+  right: 0px;
+  position: fixed;
+  margin-right: 17%;
+}
+nav a {
+  padding: 2px 0px;
+  text-decoration: none;
+  color: inherit;
+  font-size: 1em;
+  border-bottom: ridge 1px;
+  margin: 0 10px;
+}
+
+.header {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+  position: absolute;
+  top: 0px;
+}
+
+.big {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+}
+
+.arrow {
+  position: absolute;
+  position-area: center bottom;
+  bottom: 0px;
+  padding-bottom: 2.5%;
+  font-size: 1em;
+  text-decoration: none;
+  color: inherit;
+  width: 2.5vmax;
+}
+
+.instagram {
+  bottom: 4%;
+  position: absolute;
+  right: 6%;
+  color: white;
+  font-size: 1.5em;
+  text-decoration: none;
+}
+
+.bottom {
+  background: linear-gradient(135deg, #170826, #140840);
+  position: relative;
+  bottom: -100vh;
+  padding: 30% 0% 0% 0%;
+}
+
+h2 {
+  color: blue;
+}
+
+.parallax {
+  perspective: 1px;
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.parallax__layer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.layer-front {
+  transform: translateZ(0);
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+}
+
+.big {
+  transform: translateZ(-1px);
+  scale: 2;
+}
+
+@media (max-width: 900px) {
+  h1 {
+    z-index: -1;
+  }
+  .bottom {
+    padding: 20% 0 0 0;
+  }
+  nav {
+    justify-self: anchor-center;
+    padding-left: 0%;
+  }
+  nav .directions {
+    position-area: center;
+    padding: 5px 10px;
+    border: solid 2px;
+    margin: 0px;
+  }
+  nav a {
+    border-top: ridge 1px;
+  }
+  .arrow {
+    right: 0px;
+    position-area: bottom right;
+    padding-right: 2.5%;
+    width: 6vmax;
+  }
+  .taiz {
+    width: 90vw;
+    right: 42px;
+    position: relative;
+    padding-bottom: 10%;
+  }
+  .pine {
+    width: 85vw;
+    float: right;
+    padding-bottom: 6%;
+    position: relative;
+    left: 30px;
+  }
+  .col {
+    width: 80vw;
+    position: relative;
+    left: 22px;
+  }
+  img {
+    max-inline-size: inherit;
+  }
+}
+@media (min-width: 900px) {
+  .bottom {
+    text-align: center;
+    padding: 10% 0 15% 0;
+  }
+  .bottom img {
+    max-inline-size: 24vmax;
+    padding: 0 2%;
+  }
+}/*# sourceMappingURL=main.css.map */

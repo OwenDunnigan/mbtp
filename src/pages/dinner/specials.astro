@@ -1,0 +1,146 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Goods & Services">
+    <nav>
+        <a href="/dinner/specials">Goods & Services</a>
+        <a href="/dinner/merch">Merch</a>
+        <a href="/dinner">Home</a>
+        <a class="directions" href="https://maps.app.goo.gl/KHuusXZW7TB8BsHW7"
+            >Directions</a
+        >
+    </nav>
+
+    <div class="about">
+        <span
+            >Our Drink and Food menu constantly rotates with a regular feature
+            of Build Your Own Sandwhiches and Nachos.</span
+        >
+    </div>
+    <div id="space">
+        <h1>Goods & <br /> Services</h1>
+    </div>
+    <div class="flex">
+        <div class="ska card">
+            <img src="/img/img8.jpg" />
+            <h2>Ska Sundaze</h2>
+            <p>
+                Ska Sundaze features our Homaemade Corn Dogs and a Long Island
+                drink special!
+            </p>
+        </div>
+        <div class="craft card">
+            <h2>Craft Mondays</h2>
+        </div>
+
+        <div class="main block">
+            <h2>Mainstays</h2>
+        </div>
+
+        <div class="rotate block">
+            <span>
+                <h2>Rotating</h2> We contsistently have rotate our food items with
+                weekend/holiday specials and seasonal riffs
+            </span>
+            <li>Egg Nog</li>
+            <li>Tea Party</li>
+            <li>Valentines</li>
+            <li>St. Patricks Day</li>
+        </div>
+
+        <div class="DEE block">
+            <h2>Diversions & Eclectic Encounters</h2>
+        </div>
+    </div>
+</Layout>
+
+<style lang="sass">
+    nav
+        position: fixed
+        top: 0
+        width: 100%
+        background: rgba(0, 0, 0, 0.8)
+        padding: 1rem
+        text-align: center
+        z-index: 1000
+        a
+            color: white
+            margin: 0 1rem
+            text-decoration: none
+
+    figure
+        img
+            height: 69vh
+
+    span
+        text-align: center
+
+    h1
+        font-size: 28vw
+        line-height: 23vh
+        margin: 0
+        position: fixed
+        top: 50%
+        left: 50%
+        transform: translate(-50%, -50%)
+        /* animation-timeline support is limited, keeping original */
+        animation-timeline: scroll(root)
+        animation-range: entry 0% cover 100%
+        animation-name: fadeToGrey
+        z-index: -1
+
+    #space
+        height: 100vh
+        scroll-timeline: --squareTimeline y
+        /* Firefox supports the older "vertical" syntax */
+        scroll-timeline: --squareTimeline vertical
+
+    .about
+        position: absolute
+        right: 0px
+        text-align: right
+        position-area: right
+        width: 48vw
+        padding-right: 1%
+        top: 10vh /* Added top offset so it is not hidden by nav */
+
+    .flex
+        display: grid
+
+        h2
+            font-size: 7rem
+            display: inline
+
+        .card
+            padding: 2%
+            margin: 5%
+            background: grey
+
+            img
+                float: right
+                width: 50%
+            h2
+                font-size: 7rem
+                width: 50%
+                display: inline-block
+                word-break: break-all
+                margin: 0
+            p
+                margin: 0
+                font-size: 2rem
+
+        .block
+            padding: 2%
+            margin: 5%
+            border-left: 1px double grey
+
+    @media (min-width: 1300px)
+        .flex
+            grid-template-columns: 1fr 1fr
+            margin: 0 10%
+
+    @keyframes fadeToGrey
+        to
+            color: rgba(128, 128, 128, 0.5)
+</style>

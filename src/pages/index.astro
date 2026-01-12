@@ -1,0 +1,117 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Must Be The Place">
+    <div class="selector-container">
+        <h1>Must Be The Place</h1>
+        <div class="choices">
+            <a href="/lunch" class="choice" data-astro-prefetch="hover">Lunch</a
+            >
+            <a href="/dinner" class="choice" data-astro-prefetch="hover"
+                >Dinner</a
+            >
+        </div>
+    </div>
+</Layout>
+
+<script>
+    const LUNCH_CSV_URL =
+        import.meta.env.PUBLIC_CSV_DATA_URL_LUNCH || "/lunch_data.csv";
+
+    // Extend window interface for TS (hacky but works for inline scripts without setup)
+    // @ts-ignore
+    window.lunchDataPromise = null;
+
+    function setupPreload() {
+        const lunchLink = document.querySelector('a[href="/lunch"]');
+
+        if (lunchLink) {
+            lunchLink.addEventListener(
+                "mouseenter",
+                () => {
+                    // @ts-ignore
+                    if (!window.lunchDataPromise) {
+                        console.log("Preloading Lunch Data...");
+                        // @ts-ignore
+                        window.lunchDataPromise = fetch(LUNCH_CSV_URL)
+                            .then((res) => {
+                                if (!res.ok) throw new Error("Preload failed");
+                                return res.text();
+                            })
+                            .catch((err) => {
+                                console.error("Preload error", err);
+                                return null;
+                            });
+                    }
+                },
+                { once: true },
+            ); // Only attach once
+        }
+    }
+
+    // Run on initial load
+    setupPreload();
+
+    // Run on view transitions navigation
+    document.addEventListener("astro:page-load", setupPreload);
+</script>
+
+<style>
+    .selector-container {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: transparent;
+        color: white; /* White text looks better on Dark Blue */
+        position: relative;
+        z-index: 10;
+    }
+
+    h1 {
+        font-size: clamp(2rem, 10vw, 6rem);
+        margin-bottom: 3rem;
+        text-align: center;
+        position: relative;
+        color: white; /* White text */
+        z-index: 2;
+        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Pop text off background */
+    }
+
+    .choices {
+        display: flex;
+        gap: 2rem;
+        z-index: 2;
+    }
+
+    .choice {
+        font-size: 2rem;
+        padding: 1rem 3rem;
+        border: 2px solid white;
+        text-decoration: none;
+        color: white;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        position: relative;
+        overflow: hidden;
+        background: rgba(1, 31, 40, 0.3); /* Slight semi-transparent backing */
+        backdrop-filter: blur(5px);
+    }
+
+    .choice:hover {
+        background-color: white;
+        color: #011f28;
+        cursor: pointer;
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+    }
+
+    @media (max-width: 600px) {
+        .choices {
+            flex-direction: column;
+        }
+    }
+</style>

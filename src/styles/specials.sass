@@ -1,0 +1,77 @@
+figure
+    img
+        height: 69vh
+
+span
+    text-align: center
+
+h1
+    font-size: 28vw
+    line-height: 23vh
+    margin: 0
+    position: fixed
+    top: 50%
+    left: 50%
+    transform: translate(-50%, -50%)
+    animation-timeline: scroll(root)
+    animation-range: entry 0% cover 100%
+    animation-name: fadeToGrey
+    z-index: -1
+
+#space
+  height: 100vh
+  scroll-timeline: --squareTimeline y
+  /* Firefox supports the older "vertical" syntax */
+  scroll-timeline: --squareTimeline vertical
+
+
+.about
+    position: absolute
+    right: 0px
+    text-align: right
+    position-area: right
+    width: 48vw
+    padding-right: 1%
+
+.flex
+    display: grid
+    
+
+    h2 
+        font-size: 7rem
+        display: inline
+
+    .card
+        padding: 2%
+        margin: 5%
+        background: grey
+
+        img
+            float: right
+            width: 50%
+        h2
+            font-size: 7rem
+            width: 50%
+            display: inline-block
+            word-break: break-all
+            margin: 0
+        p
+            margin: 0
+            font-size: 2rem
+
+    .block
+        padding: 2%
+        margin: 5%
+        border-left: 1px double grey
+
+
+@media (min-width: 1300px) 
+    .flex
+        grid-template-columns: 1fr 1fr
+        margin: 0 10%
+
+@keyframes fadeToGrey 
+    to 
+        color: rgba(128, 128, 128, 0.5)
+          
+        

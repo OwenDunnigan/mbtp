@@ -1,0 +1,270 @@
+---
+import "../styles/main.sass";
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+import { ClientRouter } from "astro:transitions";
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Astro description" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<ClientRouter />
+	</head>
+	<body>
+		<div class="blob-container" transition:persist>
+			<div class="blob blob-1"></div>
+			<div class="blob blob-2"></div>
+			<div class="blob blob-3"></div>
+			<div class="blob blob-4"></div>
+		</div>
+		<slot />
+		<script>
+			// Define transition logic in a robust way that survives re-runs
+			// We attach functions to window so we can reference them for removal
+
+			// @ts-ignore
+			if (!window.obsidianTransitionLogic) {
+				window.obsidianTransitionLogic = {
+					currentTransition: "",
+					cleanupTimer: null,
+
+					handleBeforePreparation: (event) => {
+						// Cancel any pending cleanup from previous navigations to prevent race conditions
+						if (window.obsidianTransitionLogic.cleanupTimer) {
+							clearTimeout(
+								window.obsidianTransitionLogic.cleanupTimer,
+							);
+							window.obsidianTransitionLogic.cleanupTimer = null;
+						}
+
+						// Use event.from for source of truth, fallback to current location
+						const fromUrl = event.from || new URL(location.href);
+						const toUrl = event.to; // event.to is a URL object by default in Astro 5
+
+						const fromPath =
+							fromUrl.pathname.replace(/\/$/, "") || "/";
+						const toPath = toUrl.pathname.replace(/\/$/, "") || "/";
+						const html = document.documentElement;
+						const navType = event.navigationType; // 'push', 'replace', 'traverse'
+
+						console.log(
+							"Navigating from:",
+							fromPath,
+							"to:",
+							toPath,
+							"Type:",
+							navType,
+						);
+
+						let type = "";
+
+						// Forward Navigations
+						if (toPath.startsWith("/lunch")) {
+							type = "lunch";
+						} else if (toPath.startsWith("/dinner")) {
+							type = "dinner";
+						}
+						// Backward Navigations (Returning to Home)
+						else if (toPath === "/" || toPath === "") {
+							// If we are coming BACK to home
+							console.log(
+								"Returning to home. Checking origin path:",
+								fromPath,
+							);
+							if (fromPath.includes("/lunch")) {
+								type = "lunch-back";
+							} else if (fromPath.includes("/dinner")) {
+								type = "dinner-back";
+							}
+						}
+
+						console.log(
+							"Transition Decision. From:",
+							fromPath,
+							"To:",
+							toPath,
+							"Type:",
+							type,
+						);
+
+						// Apply transition
+						window.obsidianTransitionLogic.currentTransition = type;
+						html.dataset.transitionTo = type;
+					},
+
+					handleBeforeSwap: (event) => {
+						const type =
+							window.obsidianTransitionLogic.currentTransition;
+						console.log("Transferring transition:", type);
+						event.newDocument.documentElement.dataset.transitionTo =
+							type;
+					},
+
+					handlePageLoad: () => {
+						// Store timer ID to allow cancellation
+						window.obsidianTransitionLogic.cleanupTimer =
+							setTimeout(() => {
+								document.documentElement.dataset.transitionTo =
+									"";
+								window.obsidianTransitionLogic.currentTransition =
+									"";
+							}, 2500); // 2.5s coverage
+					},
+				};
+			}
+
+			// Remove existing listeners to prevent stacking
+			const logic = (window as any).obsidianTransitionLogic;
+			document.removeEventListener(
+				"astro:before-preparation",
+				logic.handleBeforePreparation,
+			);
+			document.removeEventListener(
+				"astro:before-swap",
+				logic.handleBeforeSwap,
+			);
+			document.removeEventListener(
+				"astro:page-load",
+				logic.handlePageLoad,
+			);
+
+			// Add listeners
+			document.addEventListener(
+				"astro:before-preparation",
+				logic.handleBeforePreparation,
+			);
+			document.addEventListener(
+				"astro:before-swap",
+				logic.handleBeforeSwap,
+			);
+			document.addEventListener("astro:page-load", logic.handlePageLoad);
+		</script>
+		<style is:global>
+			/* 3D Blob Animation Layer - Moved to Layout for persistence */
+			.blob-container {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100vw;
+				height: 100vh;
+				z-index: -1; /* Behind everything */
+				background-color: #011f28; /* Dark Blue */
+				overflow: hidden;
+				perspective: 1000px;
+				pointer-events: none; /* Let clicks pass through */
+			}
+
+			.blob {
+				position: absolute;
+				border-radius: 50%;
+				filter: blur(60px);
+				opacity: 0.7;
+				mix-blend-mode: screen;
+				animation-timing-function: ease-in-out;
+				animation-iteration-count: infinite;
+			}
+
+			.blob-1 {
+				width: 70vw;
+				height: 70vw;
+				background: #79b473; /* Green */
+				top: -20%;
+				left: -20%;
+				animation: float3d-1 15s infinite;
+			}
+
+			.blob-2 {
+				width: 60vw;
+				height: 60vw;
+				background: #f58904; /* Orange */
+				bottom: -20%;
+				right: -20%;
+				animation: float3d-2 18s infinite;
+			}
+
+			.blob-3 {
+				width: 50vw;
+				height: 50vw;
+				background: #6d6466; /* Grey/Purple-ish */
+				top: 30%;
+				left: 30%;
+				opacity: 0.5;
+				animation: float3d-3 20s infinite;
+			}
+
+			.blob-4 {
+				width: 40vw;
+				height: 40vw;
+				background: #011f28;
+				top: 10%;
+				right: 10%;
+				mix-blend-mode: overlay;
+				animation: float3d-4 25s infinite;
+			}
+
+			@keyframes float3d-1 {
+				0% {
+					transform: translate3d(0, 0, 0) scale(1);
+				}
+				33% {
+					transform: translate3d(50px, -50px, 100px) scale(1.1);
+				}
+				66% {
+					transform: translate3d(-30px, 40px, -50px) scale(0.9);
+				}
+				100% {
+					transform: translate3d(0, 0, 0) scale(1);
+				}
+			}
+
+			@keyframes float3d-2 {
+				0% {
+					transform: translate3d(0, 0, 0) scale(1);
+				}
+				33% {
+					transform: translate3d(-60px, 60px, -100px) scale(0.8);
+				}
+				66% {
+					transform: translate3d(40px, -30px, 50px) scale(1.1);
+				}
+				100% {
+					transform: translate3d(0, 0, 0) scale(1);
+				}
+			}
+
+			@keyframes float3d-3 {
+				0% {
+					transform: translate3d(0, 0, 0);
+				}
+				50% {
+					transform: translate3d(30px, 30px, 150px);
+				}
+				100% {
+					transform: translate3d(0, 0, 0);
+				}
+			}
+
+			@keyframes float3d-4 {
+				0% {
+					transform: translate3d(0, 0, 0);
+				}
+				50% {
+					transform: translate3d(-40px, -20px, -80px);
+				}
+				100% {
+					transform: translate3d(0, 0, 0);
+				}
+			}
+		</style>
+	</body>
+</html>

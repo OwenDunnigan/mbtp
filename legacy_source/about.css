@@ -1,0 +1,28 @@
+.image-container {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-container .layer-bg {
+  z-index: 1;
+}
+
+.image-container .layer-top {
+  z-index: 2;
+  transform-origin: center center;
+  will-change: transform;
+}

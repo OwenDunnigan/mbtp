@@ -1,0 +1,473 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Must Be The Place - Lunch">
+    <div class="lunch-wrapper">
+        <div class="lunch-container">
+            <header>
+                <h1>Lunch Menu</h1>
+                <p class="subtitle">Fresh & Local</p>
+                <a href="/" class="back-link">← Back to Night</a>
+            </header>
+
+            <section id="hours-section" class="hours-container">
+                <h2>Hours of Operation</h2>
+                <div id="hours-grid" class="hours-grid">
+                    <!-- Hours will be populated here -->
+                    <p>Loading hours...</p>
+                </div>
+            </section>
+
+            <main id="menu-section" class="menu-container">
+                <!-- Menu categories will be populated here -->
+                <p>Loading menu...</p>
+            </main>
+        </div>
+    </div>
+</Layout>
+
+<script>
+    import Papa from "papaparse";
+
+    // URL from environment variable
+    const DATA_URL = import.meta.env.PUBLIC_CSV_DATA_URL_LUNCH;
+
+    interface MenuItem {
+        "Item Name": string;
+        Category: string;
+        Dietary: string;
+        "Price (CAD)": string;
+        "Day Available": string;
+        "Opening Time": string;
+        "Closing Time": string;
+        "Special Offer": string;
+        Image?: string;
+    }
+
+    async function init() {
+        console.log("Init Lunch Page");
+        try {
+            console.log("Fetching data from:", DATA_URL);
+            if (!DATA_URL) {
+                console.error("DATA_URL missing");
+                throw new Error(
+                    "CSV Data URL is not defined. Check PUBLIC_CSV_DATA_URL_LUNCH in .env",
+                );
+            }
+
+            let csvText;
+
+            // @ts-ignore
+            if (window.lunchDataPromise) {
+                console.log("Found preloaded data promise. Awaiting...");
+                try {
+                    // @ts-ignore
+                    csvText = await window.lunchDataPromise;
+                    console.log(
+                        "Preload resolved. Type:",
+                        typeof csvText,
+                        "Length:",
+                        csvText?.length,
+                    );
+                    // If it resolved to null (caught error in index.astro), ensure we know
+                    if (csvText === null)
+                        console.log("Preload promise resolved to null");
+                } catch (preloadErr) {
+                    console.error(
+                        "Error awaiting preload promise:",
+                        preloadErr,
+                    );
+                }
+            } else {
+                console.log("No preloaded data promise found.");
+            }
+
+            // If preload failed or didn't exist, fetch fresh
+            if (!csvText) {
+                console.log("Fetching fresh data from:", DATA_URL);
+                const response = await fetch(DATA_URL);
+                console.log("Fetch response status:", response.status);
+                if (!response.ok) {
+                    throw new Error(
+                        `Failed to fetch data: ${response.status} ${response.statusText}`,
+                    );
+                }
+                csvText = await response.text();
+            }
+
+            if (!csvText || csvText.trim().length === 0) {
+                throw new Error("Received empty data");
+            }
+
+            console.log(
+                "CSV Data received (first 100 chars):",
+                csvText.substring(0, 100),
+            );
+
+            Papa.parse(csvText, {
+                header: true,
+                skipEmptyLines: true,
+                complete: (results) => {
+                    console.log("Parsed results:", results);
+                    if (results.errors && results.errors.length > 0) {
+                        console.error("Parse errors:", results.errors);
+                    }
+                    const data = results.data as MenuItem[];
+
+                    if (data.length === 0) {
+                        showError("No data found in CSV.");
+                        return;
+                    }
+
+                    renderHours(data);
+                    renderMenu(data);
+                },
+                error: (error: any) => {
+                    console.error("Error parsing CSV:", error);
+                    showError(`Error parsing CSV: ${error.message}`);
+                },
+            });
+        } catch (e) {
+            console.error("Error fetching data:", e);
+            if (e instanceof Error) {
+                showError(e.message);
+            } else {
+                showError(String(e));
+            }
+        }
+    }
+
+    function showError(message: string) {
+        const hoursGrid = document.getElementById("hours-grid");
+        const menuContainer = document.getElementById("menu-section");
+
+        const errorHtml = `<p style="color: red; font-weight: bold;">${message}</p>`;
+
+        if (hoursGrid) hoursGrid.innerHTML = errorHtml;
+        if (menuContainer) menuContainer.innerHTML = errorHtml;
+    }
+
+    function renderHours(data: MenuItem[]) {
+        const hoursGrid = document.getElementById("hours-grid");
+        if (!hoursGrid) return;
+
+        // Extract unique days and their hours.
+        // We assume the file contains rows for each day or we just find the unique day entries.
+        // A robust way works by looking for the FIRST occurrence of each day name.
+        const daysOrder = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ];
+        const hoursMap = new Map();
+
+        data.forEach((item) => {
+            const day = item["Day Available"];
+            if (day && !hoursMap.has(day)) {
+                hoursMap.set(day, {
+                    open: item["Opening Time"],
+                    close: item["Closing Time"],
+                });
+            }
+        });
+
+        let html = "";
+        daysOrder.forEach((day) => {
+            if (hoursMap.has(day)) {
+                const { open, close } = hoursMap.get(day);
+                const timeString =
+                    open === "CLOSED" || close === "CLOSED"
+                        ? "CLOSED"
+                        : `${open} - ${close}`;
+                html += `
+                    <div class="hour-row">
+                        <span class="day">${day}</span>
+                        <span class="time">${timeString}</span>
+                    </div>
+                `;
+            }
+        });
+
+        hoursGrid.innerHTML = html;
+    }
+
+    function renderMenu(data: MenuItem[]) {
+        const menuContainer = document.getElementById("menu-section");
+        if (!menuContainer) return;
+
+        // Group by Category
+        const categories = new Map();
+
+        data.forEach((item) => {
+            if (!item["Item Name"] || !item["Category"]) return;
+            const category = item["Category"];
+            if (!categories.has(category)) {
+                categories.set(category, []);
+            }
+            // Avoid duplicate items if they appear on multiple lines (e.g. for different days)
+            const existing = categories
+                .get(category)
+                .find((i: MenuItem) => i["Item Name"] === item["Item Name"]);
+            if (!existing) {
+                categories.get(category).push(item);
+            }
+        });
+
+        let html = "";
+        categories.forEach((items, category) => {
+            html += `
+                <div class="category-block">
+                    <h2 class="category-title">${category}</h2>
+                    <div class="category-items">
+            `;
+
+            items.forEach((item: MenuItem) => {
+                const imageHtml = item["Image"]
+                    ? `<div class="item-image"><img src="${item["Image"]}" alt="${item["Item Name"]}" loading="lazy" /></div>`
+                    : "";
+
+                html += `
+                    <div class="menu-item-card">
+                        ${imageHtml}
+                        <div class="item-header">
+                            <h3 class="item-name">${item["Item Name"]}</h3>
+                            <span class="item-price">$${item["Price (CAD)"]}</span>
+                        </div>
+                        <div class="item-details">
+                            ${item["Dietary"] && item["Dietary"] !== "None" ? `<span class="dietary-tag">${item["Dietary"]}</span>` : ""}
+                            ${item["Special Offer"] && item["Special Offer"] !== "None" ? `<span class="special-tag">${item["Special Offer"]}</span>` : ""}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+
+        menuContainer.innerHTML = html;
+    }
+
+    // Run init on every navigation to this page
+    document.addEventListener("astro:page-load", () => {
+        // Only run if we are actually on the lunch page (though this script is scoped, safeguards help)
+        if (document.getElementById("hours-grid")) {
+            init();
+        }
+    });
+</script>
+
+<style>
+    /* 
+       Palette:
+       Background: #DED2CE (Light Tan)
+       Text: #011F28 (Dark Blue/Black)
+       Accent: #F58904 (Orange)
+       Secondary Green: #79B473
+       Secondary Grey: #6D6466
+    */
+
+    :global(body) {
+        background-color: #ded2ce;
+        color: #011f28;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        margin: 0;
+    }
+
+    .lunch-wrapper {
+        background-color: #ded2ce; /* Solid background covers screen */
+        min-height: 100vh;
+        width: 100vw;
+        position: relative;
+        z-index: 10; /* Sit above persistent blobs */
+    }
+
+    .lunch-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    header {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+
+    h1 {
+        font-size: 4rem;
+        color: #f58904;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .subtitle {
+        font-size: 1.5rem;
+        color: #6d6466;
+        margin-top: 10px;
+        font-weight: 300;
+        font-style: italic;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #011f28;
+        font-weight: bold;
+        text-decoration: none;
+        border-bottom: 2px solid #f58904;
+        transition: color 0.3s;
+    }
+
+    .back-link:hover {
+        color: #f58904;
+    }
+
+    /* Hours Section */
+    .hours-container {
+        background-color: #fff; /* Slight contrast card */
+        background-color: rgba(255, 255, 255, 0.4);
+        padding: 30px;
+        border-radius: 8px;
+        margin-bottom: 50px;
+        border: 1px solid #6d6466;
+    }
+
+    .hours-container h2 {
+        color: #011f28;
+        border-bottom: 2px solid #f58904;
+        padding-bottom: 10px;
+        margin-top: 0;
+        display: inline-block;
+    }
+
+    .hours-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .hour-row {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .hour-row .day {
+        font-weight: bold;
+        color: #79b473;
+        font-size: 1.1rem;
+    }
+
+    .hour-row .time {
+        color: #6d6466;
+    }
+
+    /* Menu Section */
+    .menu-container {
+        margin-top: 40px;
+    }
+
+    :global(.category-block) {
+        margin-bottom: 60px;
+    }
+
+    :global(.category-title) {
+        font-size: 2.5rem;
+        color: #011f28;
+        margin-bottom: 30px;
+        border-left: 5px solid #f58904;
+        padding-left: 20px;
+    }
+
+    :global(.category-items) {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 30px;
+    }
+
+    :global(.menu-item-card) {
+        background: rgba(255, 255, 255, 0.5);
+        padding: 20px;
+        border-radius: 4px;
+        border-left: 1px solid #79b473;
+        transition: transform 0.2s;
+    }
+
+    :global(.menu-item-card:hover) {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.8);
+    }
+
+    :global(.item-image) {
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+
+    :global(.item-image img) {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    :global(.menu-item-card:hover .item-image img) {
+        transform: scale(1.05);
+    }
+
+    :global(.item-header) {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 10px;
+        border-bottom: 1px dotted #6d6466;
+        padding-bottom: 5px;
+    }
+
+    :global(.item-name) {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    :global(.item-price) {
+        font-weight: bold;
+        color: #f58904;
+        font-size: 1.1rem;
+    }
+
+    :global(.item-details) {
+        font-size: 0.9rem;
+        color: #6d6466;
+    }
+
+    :global(.dietary-tag),
+    :global(.special-tag) {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        margin-right: 5px;
+        text-transform: uppercase;
+    }
+
+    :global(.dietary-tag) {
+        background-color: #79b473;
+        color: white;
+    }
+
+    :global(.special-tag) {
+        background-color: #f58904;
+        color: white;
+    }
+</style>

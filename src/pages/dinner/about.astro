@@ -1,0 +1,86 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import ParallaxKitty from "../../components/ParallaxKitty.astro";
+---
+
+<Layout title="About">
+    <div class="content-wrapper">
+        <nav>
+            <a href="/dinner/specials">Goods & Services</a>
+            <a href="/dinner/merch">Merch</a>
+            <a href="/dinner">Home</a>
+            <a
+                class="directions"
+                href="https://maps.app.goo.gl/KHuusXZW7TB8BsHW7">Directions</a
+            >
+        </nav>
+
+        <h1>About</h1>
+        <div class="text-content">
+            <p>
+                A group of 20 of us are planning to meet—will that be a problem?
+                We are a small space with a capacity of 49 people. Depending on
+                the night and time, it is very likely that everyone in your
+                party will not be able to get in right away. On busy nights, we
+                often have to run a line outside. If some of your group shows up
+                an hour after others do, we can’t let them in before the other
+                people in line who have been waiting. We do head counts and let
+                as many people in as we can, but once we are at capacity,
+                someone must leave for someone else to go in. If you want to
+                bring a group, we suggest you keep your group fairly small, get
+                to the bar early, and that you try to show up at roughly the
+                same time. Explain to folks joining you that if they come late,
+                they might have to wait in line. Another great option for your
+                group might be to book out a private event - more information is
+                available here.
+            </p>
+        </div>
+
+        <ParallaxKitty
+            bgImage="/layer1.jpg"
+            fgImage="/layer2.png"
+            alt="Original Kitty"
+            height="60vh"
+        />
+
+        <div class="text-content">
+            <p>Meet Trixie & Scooter!</p>
+        </div>
+
+        <ParallaxKitty
+            bgImage="/layer1.jpg"
+            fgImage="/trixie-n-scooter.jpeg"
+            alt="Trixie and Scooter"
+            height="60vh"
+        />
+    </div>
+</Layout>
+
+<style>
+    .content-wrapper {
+        padding: 5rem 1rem 1rem;
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: left;
+    }
+    h1 {
+        position: relative; /* Override invalid fixed/absolute from main.sass for this page if needed */
+        font-size: 3rem;
+        margin-bottom: 2rem;
+        color: white;
+    }
+    .text-content {
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    nav {
+        top: 0;
+        left: 0;
+        padding: 1rem;
+        position: fixed;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        text-align: center;
+    }
+</style>
