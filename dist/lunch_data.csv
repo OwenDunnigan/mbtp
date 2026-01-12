@@ -1,0 +1,13 @@
+Item Name,Category,Dietary,Price (CAD),Day Available,Opening Time,Closing Time,Special Offer
+Classic Burger,Main Course,None,14.99,Monday,12:00:00 PM,4:00:00 PM,None
+Margherita Pizza,Main Course,None,18.5,Tuesday,CLOSED,CLOSED,None
+Caesar Salad,Appetizer,None,9.75,Wednesday,CLOSED,CLOSED,None
+Chocolate Cake,Dessert,None,7,Thursday,12:00:00 PM,4:00:00 PM,None
+Iced Coffee,Beverage,None,4.5,Friday,12:00:00 PM,4:00:00 PM,None
+Steak Frites,Main Course,None,28.99,Saturday,12:00:00 PM,4:00:00 PM,None
+Pancakes,Breakfast,None,12.5,Sunday,12:00:00 PM,4:00:00 PM,None
+Tomato Soup,Appetizer,Vegetarian,8.00,Monday,12:00:00 PM,4:00:00 PM,None
+Club Sandwich,Main Course,None,16.50,Monday,12:00:00 PM,4:00:00 PM,None
+Vegan Bowl,Main Course,Vegan,19.00,Monday,12:00:00 PM,4:00:00 PM,None
+Cheesecake,Dessert,None,8.50,Monday,12:00:00 PM,4:00:00 PM,None
+Latte,Beverage,None,5.00,Monday,12:00:00 PM,4:00:00 PM,None
