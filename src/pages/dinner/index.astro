@@ -24,6 +24,11 @@ import Layout from "../../layouts/Layout.astro";
 				><path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"
 				></path></svg
 			>
+			<div class="tumbler-wrapper">
+				<div class="tumbler-list" id="tumbler-list">
+					<!-- Words populate via JS -->
+				</div>
+			</div>
 		</div>
 		<div class="parallax-layer big">
 			<img src="/img/big.gif" class="header" />
@@ -39,3 +44,129 @@ import Layout from "../../layouts/Layout.astro";
 		</div>
 	</div>
 </Layout>
+
+<script>
+	import Papa from "papaparse";
+
+	// Global cache key
+	const CACHE_KEY = "dinnerDataCache";
+
+	function shuffleArray(array) {
+		for (let i = array.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[array[i], array[j]] = [array[j], array[i]];
+		}
+		return array;
+	}
+
+	async function initTumbler() {
+		const listContainer = document.getElementById("tumbler-list");
+		if (!listContainer) return;
+
+		let words = [];
+
+		// Check global cache
+		// @ts-ignore
+		if (window[CACHE_KEY]) {
+			// @ts-ignore
+			words = window[CACHE_KEY];
+		} else {
+			// Fetch and parse
+			try {
+				const response = await fetch("/dinner_data.csv");
+				const csvText = await response.text();
+				const result = Papa.parse(csvText, {
+					header: true,
+					skipEmptyLines: true,
+				});
+				// Extract "Descriptor" column
+				words = result.data
+					.map((row) => row["Descriptor"])
+					.filter((w) => w);
+
+				// Cache it
+				// @ts-ignore
+				window[CACHE_KEY] = words;
+			} catch (err) {
+				console.error("Failed to load dinner data", err);
+				// Fallback
+				words = ["Bar", "Dinner", "Nachos", "Date", "Cocktails"];
+			}
+		}
+
+		// Randomize
+		const shuffled = shuffleArray([...words]); // Copy before shuffle if we want fresh random on each nav, or shuffle once? User asked for randomness.
+		// Let's create a long list for scrolling (duplicate the shuffled list a few times)
+		const displayList = [...shuffled, ...shuffled, ...shuffled];
+
+		// Render
+		listContainer.innerHTML = displayList
+			.map((word) => `<div class="word">${word}</div>`)
+			.join("");
+
+		setupScrollSync();
+	}
+
+	function setupScrollSync() {
+		const parallax = document.querySelector(".parallax");
+		const list = document.getElementById("tumbler-list");
+
+		if (parallax && list) {
+			parallax.addEventListener("scroll", () => {
+				const scrollTop = parallax.scrollTop;
+				// Move the list up as we scroll down
+				const offset = scrollTop * 0.5;
+				list.style.transform = `translateY(-${offset}px)`;
+			});
+		}
+	}
+
+	document.addEventListener("astro:page-load", initTumbler);
+</script>
+
+<style>
+	.tumbler-wrapper {
+		position: absolute;
+		top: 58%;
+		left: 75%;
+		transform: translateX(-50%);
+		height: 200px; /* Increased height to show more flow */
+		width: 100%;
+		overflow: hidden;
+		text-align: center;
+		pointer-events: none;
+		z-index: 2;
+
+		/* Gradient Mask for fading out top and bottom */
+		mask-image: linear-gradient(
+			to bottom,
+			transparent 0%,
+			black 20%,
+			black 80%,
+			transparent 100%
+		);
+		-webkit-mask-image: linear-gradient(
+			to bottom,
+			transparent 0%,
+			black 20%,
+			black 80%,
+			transparent 100%
+		);
+	}
+
+	.tumbler-list {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding-top: 80px; /* Push first item into visible zone */
+	}
+
+	.word {
+		font-size: 5rem;
+		line-height: 80px; /* Adjusted for larger font */
+		color: rgba(255, 255, 255, 0.4);
+		font-weight: 300;
+		text-transform: uppercase;
+		letter-spacing: 0.5em;
+	}
+</style>
