@@ -5,8 +5,13 @@ html, body
     
 h1 
     color: rgb(31 58 77 / 97%)
-    position-area: center
     position: absolute
+    top: 50%
+    left: 50%
+    transform: translate(-50%, -50%)
+    margin: 0
+    text-align: center
+    width: 100%
     font-size: clamp(5em, 34vw, 7em)
 
 nav
@@ -41,9 +46,9 @@ nav
 
 .arrow
     position: absolute
-    position-area: center bottom
-    bottom: 0px
-    padding-bottom: 2.5%
+    bottom: 2.5%
+    left: 50%
+    transform: translateX(-50%)
     font-size: 1em
     text-decoration: none
     color: inherit
@@ -111,8 +116,11 @@ h2
         a
             border-top: ridge 1px    
     .arrow
+        /* Keep mobile behavior or reset? Assuming mobile behavior was intentional but fixing the position-area there too just in case */
+        left: auto
+        transform: none
         right: 0px
-        position-area: bottom right
+        bottom: 0px
         padding-right: 2.5%
         width: 6vmax
     .taiz
