@@ -26,6 +26,7 @@ jobs:
         uses: withastro/action@v2
         env:
           PUBLIC_CSV_DATA_URL_LUNCH: ${{ vars.PUBLIC_CSV_DATA_URL_LUNCH }}
+          PUBLIC_CSV_DATA_URL_DINNER: ${{ vars.PUBLIC_CSV_DATA_URL_DINNER }}
 
   deploy:
     needs: build
