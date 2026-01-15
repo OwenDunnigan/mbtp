@@ -3,6 +3,32 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout title="Must Be The Place">
+    <div class="blob-container">
+        <div class="blob-group group-4">
+            <div class="blob blob-5">
+                <div class="blob blob-6"></div>
+                <div class="blob blob-7"></div>
+                <div class="blob blob-8"></div>
+            </div>
+        </div>
+
+        <div class="blob-group group-1">
+            <div class="blob blob-1"></div>
+        </div>
+
+        <div class="blob-group group-2">
+            <div class="blob blob-2">
+                <div class="blob blob-4"></div>
+            </div>
+        </div>
+
+        <div class="blob-group group-3">
+            <div class="blob blob-3"></div>
+        </div>
+    </div>
+
+    <div class="noise-overlay"></div>
+
     <div class="selector-container">
         <h1>Must Be The Place</h1>
         <div class="choices">
@@ -19,13 +45,11 @@ import Layout from "../layouts/Layout.astro";
     const LUNCH_CSV_URL =
         import.meta.env.PUBLIC_CSV_DATA_URL_LUNCH || "/lunch_data.csv";
 
-    // Extend window interface for TS (hacky but works for inline scripts without setup)
     // @ts-ignore
     window.lunchDataPromise = null;
 
     function setupPreload() {
         const lunchLink = document.querySelector('a[href="/lunch"]');
-
         if (lunchLink) {
             lunchLink.addEventListener(
                 "mouseenter",
@@ -46,18 +70,442 @@ import Layout from "../layouts/Layout.astro";
                     }
                 },
                 { once: true },
-            ); // Only attach once
+            );
         }
     }
 
-    // Run on initial load
-    setupPreload();
+    function setupInteraction() {
+        const container = document.querySelector(".blob-container");
+        const lunchLink = document.querySelector('a[href="/lunch"]');
+        const dinnerLink = document.querySelector('a[href="/dinner"]');
 
-    // Run on view transitions navigation
-    document.addEventListener("astro:page-load", setupPreload);
+        if (!container) return;
+
+        // --- 1. PARALLAX (MOUSE & TOUCH) ---
+        const updateParallax = (clientX: number, clientY: number) => {
+            const x = clientX / window.innerWidth - 0.5;
+            const y = clientY / window.innerHeight - 0.5;
+            document.body.style.setProperty("--mouse-x", x.toFixed(3));
+            document.body.style.setProperty("--mouse-y", y.toFixed(3));
+        };
+
+        // Desktop
+        document.addEventListener("mousemove", (e) =>
+            updateParallax(e.clientX, e.clientY),
+        );
+
+        // Mobile (Touch Drag)
+        document.addEventListener(
+            "touchmove",
+            (e) => {
+                const touch = e.touches[0];
+                updateParallax(touch.clientX, touch.clientY);
+            },
+            { passive: true },
+        );
+
+        // --- 2. HOVER LOGIC (DESKTOP) ---
+        if (lunchLink && dinnerLink) {
+            lunchLink.addEventListener("mouseenter", () => {
+                container.classList.remove("hover-dinner");
+                container.classList.add("hover-lunch");
+            });
+            lunchLink.addEventListener("mouseleave", () =>
+                container.classList.remove("hover-lunch"),
+            );
+            dinnerLink.addEventListener("mouseenter", () => {
+                container.classList.remove("hover-lunch");
+                container.classList.add("hover-dinner");
+            });
+            dinnerLink.addEventListener("mouseleave", () =>
+                container.classList.remove("hover-dinner"),
+            );
+        }
+
+        // --- 3. MOBILE AUTO-CYCLE (ATTRACT MODE) ---
+        // Automatically swaps states on phone until user interacts
+        const isTouch =
+            "ontouchstart" in window || navigator.maxTouchPoints > 0;
+
+        if (isTouch) {
+            let activeState = "lunch";
+
+            const cycleState = () => {
+                if (activeState === "lunch") {
+                    container.classList.remove("hover-lunch");
+                    container.classList.add("hover-dinner");
+                    activeState = "dinner";
+                } else {
+                    container.classList.remove("hover-dinner");
+                    container.classList.add("hover-lunch");
+                    activeState = "lunch";
+                }
+            };
+
+            // Start cycling every 4 seconds
+            let cycleInterval = setInterval(cycleState, 6500);
+
+            // Trigger first swap quickly so they see movement
+            setTimeout(cycleState, 500);
+
+            // Stop cycling if user touches anything
+            const stopCycle = () => {
+                clearInterval(cycleInterval);
+                // We leave the last state active so it doesn't snap back abruptly
+            };
+
+            window.addEventListener("touchstart", stopCycle, { once: true });
+            window.addEventListener("click", stopCycle, { once: true });
+            window.addEventListener("mousemove", stopCycle, { once: true });
+        }
+    }
+
+    setupPreload();
+    setupInteraction();
+
+    document.addEventListener("astro:page-load", () => {
+        setupPreload();
+        setupInteraction();
+    });
 </script>
 
+<style is:global>
+    body {
+        overflow: hidden;
+        background-color: #011f28;
+        --mouse-x: 0;
+        --mouse-y: 0;
+    }
+</style>
+
 <style>
+    /* Container - 2.5D Flat Setup */
+    .blob-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0;
+        background-color: #011f28;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    /* Noise Overlay */
+    .noise-overlay {
+        position: fixed;
+        top: -100%;
+        left: -100%;
+        width: 300%;
+        height: 300%;
+        pointer-events: none;
+        z-index: 20;
+        opacity: 0.15;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 50 -49'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        animation: grain 8s steps(10) infinite;
+    }
+
+    @keyframes grain {
+        0%,
+        100% {
+            transform: translate(0, 0);
+        }
+        10% {
+            transform: translate(-5%, -10%);
+        }
+        30% {
+            transform: translate(3%, -15%);
+        }
+        50% {
+            transform: translate(-10%, 5%);
+        }
+        70% {
+            transform: translate(5%, 15%);
+        }
+        90% {
+            transform: translate(-5%, 10%);
+        }
+    }
+
+    /* --- GROUP WRAPPERS --- */
+    .blob-group {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+
+        /* 2.5D Movement Logic */
+        transform: scale(var(--group-scale, 1))
+            translate(
+                calc(var(--mouse-x) * var(--parallax-speed, 20px)),
+                calc(var(--mouse-y) * var(--parallax-speed, 20px))
+            );
+
+        transition:
+            transform 6s cubic-bezier(0.2, 0.8, 0.2, 1),
+            opacity 3.7s ease;
+        opacity: var(--group-opacity, 1);
+
+        mix-blend-mode: hard-light;
+    }
+
+    /* --- INTERACTION STATES --- */
+
+    /* Default */
+    .group-1 {
+        --group-scale: 1;
+        --group-opacity: 0.8;
+        --parallax-speed: 30px;
+    }
+    .group-2 {
+        --group-scale: 1;
+        --group-opacity: 0.8;
+        --parallax-speed: 40px;
+    }
+    .group-3 {
+        --group-scale: 0.8;
+        --group-opacity: 0.4;
+        --parallax-speed: 10px;
+    }
+    .group-4 {
+        --group-scale: 0.9;
+        --group-opacity: 0.6;
+        --parallax-speed: 20px;
+    }
+
+    /* Lunch State */
+    .blob-container.hover-lunch .group-1,
+    .blob-container.hover-lunch .group-2 {
+        --group-scale: 1.15;
+        --group-opacity: 1;
+        --parallax-speed: 60px;
+    }
+    .blob-container.hover-lunch .group-4 {
+        --group-scale: 0.8;
+        --group-opacity: 0.3;
+        --parallax-speed: 10px;
+    }
+
+    /* Dinner State */
+    .blob-container.hover-dinner .group-4 {
+        --group-scale: 1.25;
+        --group-opacity: 1;
+        --parallax-speed: 70px;
+        z-index: 10;
+    }
+    .blob-container.hover-dinner .group-1,
+    .blob-container.hover-dinner .group-2 {
+        --group-scale: 0.8;
+        --group-opacity: 0.4;
+        --parallax-speed: 10px;
+    }
+
+    /* --- BLOBS --- */
+
+    @property --saturation {
+        syntax: "<percentage>";
+        inherits: true;
+        initial-value: 0%;
+    }
+
+    .blob-container.hover-lunch .group-1 .blob,
+    .blob-container.hover-lunch .group-2 .blob {
+        --saturation: 20%;
+    }
+    .blob-container.hover-dinner .group-4 .blob {
+        --saturation: 30%;
+    }
+
+    .blob {
+        --saturation: 0%;
+        position: absolute;
+        border-radius: 50%;
+        mix-blend-mode: screen;
+        filter: blur(30px);
+        animation-timing-function: ease-in-out;
+        animation-direction: alternate;
+        animation-iteration-count: infinite;
+        transition: --saturation 5s ease;
+    }
+
+    /* --- COLORS --- */
+    .blob-1 {
+        /* Green */
+        width: 70vw;
+        height: 70vw;
+        background: radial-gradient(
+            circle at 40% 40%,
+            hsla(115, var(--saturation), 65%, 0.9),
+            transparent 60%
+        );
+        top: -20%;
+        left: -20%;
+        animation: float-1 20s infinite alternate;
+    }
+    .blob-2 {
+        /* Orange */
+        width: 60vw;
+        height: 60vw;
+        background: radial-gradient(
+            circle at 60% 60%,
+            hsla(33, var(--saturation), 60%, 0.9),
+            transparent 60%
+        );
+        bottom: -20%;
+        right: -20%;
+        animation: float-2 25s infinite alternate;
+    }
+    .blob-4 {
+        /* Inner Orange */
+        width: 80%;
+        opacity: 0.4;
+        height: 80%;
+        background: radial-gradient(
+            circle closest-side,
+            hsl(0deg 0% 35.01%),
+            transparent 52%
+        );
+        top: 10%;
+        left: 10%;
+        animation: float-4 30s infinite alternate;
+    }
+    .blob-3 {
+        /* Grey Bg */
+        width: 80vw;
+        height: 80vw;
+        background: radial-gradient(
+            circle closest-side,
+            hsla(347, var(--saturation), 41%, 0.3),
+            transparent 70%
+        );
+        top: 20%;
+        left: 10%;
+        animation: float-3 40s infinite alternate;
+    }
+    .blob-5 {
+        /* Blue */
+        width: 65vw;
+        height: 65vw;
+        background: radial-gradient(
+            circle at 45% 45%,
+            hsla(197, var(--saturation), 40%, 1),
+            transparent 65%
+        );
+        top: -10%;
+        right: -10%;
+        animation: float-5 35s infinite alternate;
+    }
+    .blob-6 {
+        /* Deep Blue */
+        width: 120%;
+        height: 120%;
+        background: radial-gradient(
+            circle closest-side,
+            hsla(200, var(--saturation), 30%, 0.5),
+            transparent 60%
+        );
+        top: -20%;
+        left: -20%;
+        animation: float-6 25s infinite alternate;
+    }
+    .blob-7 {
+        /* Shadow */
+        width: 90%;
+        height: 90%;
+        background: radial-gradient(
+            circle closest-side,
+            hsla(220, 50%, 10%, 0.8),
+            transparent 60%
+        );
+        bottom: -20%;
+        right: -10%;
+        mix-blend-mode: multiply;
+        animation: float-7 32s infinite alternate-reverse;
+    }
+    .blob-8 {
+        /* Highlight */
+        width: 60%;
+        height: 60%;
+        background: radial-gradient(
+            circle closest-side,
+            hsla(197, var(--saturation), 70%, 0.6),
+            transparent 60%
+        );
+        top: 20%;
+        right: 20%;
+        animation: float-8 28s infinite alternate;
+    }
+
+    /* --- ANIMATIONS (X/Y Only) --- */
+    @keyframes float-1 {
+        0% {
+            transform: translate(0, 0) scale(1);
+        }
+        100% {
+            transform: translate(5vw, 5vh) scale(1.1);
+        }
+    }
+    @keyframes float-2 {
+        0% {
+            transform: translate(0, 0) scale(1);
+        }
+        100% {
+            transform: translate(-5vw, -5vh) scale(1.05);
+        }
+    }
+    @keyframes float-3 {
+        0% {
+            transform: translate(0, 0);
+        }
+        100% {
+            transform: translate(10vw, 2vh);
+        }
+    }
+    @keyframes float-4 {
+        0% {
+            transform: translate(0, 0);
+        }
+        100% {
+            transform: translate(-70px, 70px);
+        }
+    }
+    @keyframes float-5 {
+        0% {
+            transform: translate(0, 0) scale(1);
+        }
+        100% {
+            transform: translate(-8vw, 8vh) scale(1.1);
+        }
+    }
+    @keyframes float-6 {
+        0% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+        100% {
+            transform: translate(5vw, 5vh) rotate(20deg);
+        }
+    }
+    @keyframes float-7 {
+        0% {
+            transform: translate(0, 0) scale(1);
+        }
+        100% {
+            transform: translate(5vw, -5vh) scale(0.9);
+        }
+    }
+    @keyframes float-8 {
+        0% {
+            transform: translate(0, 0);
+        }
+        100% {
+            transform: translate(-4vw, 4vh);
+        }
+    }
+
+    /* --- LAYOUT --- */
     .selector-container {
         height: 100vh;
         width: 100vw;
@@ -65,32 +513,33 @@ import Layout from "../layouts/Layout.astro";
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        background: transparent;
-        color: white; /* White text looks better on Dark Blue */
         position: relative;
         z-index: 10;
     }
 
     h1 {
+        position: relative;
+        left: auto;
+        transform: none;
         font-size: clamp(2rem, 10vw, 6rem);
         margin-bottom: 3rem;
         text-align: center;
-        position: relative;
-        color: white; /* White text */
-        z-index: 2;
-        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Pop text off background */
+        color: white;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
     }
 
     .choices {
         display: flex;
         gap: 2rem;
-        z-index: 2;
+        /* Push the buttons slightly lower from the center */
+        margin-top: 2rem;
     }
 
+    /* --- RESTORED SQUARE BUTTON STYLE --- */
     .choice {
         font-size: 2rem;
         padding: 1rem 3rem;
-        border: 2px solid white;
+        border: 2px solid white; /* Square border */
         text-decoration: none;
         color: white;
         transition: all 0.3s ease;
@@ -98,10 +547,13 @@ import Layout from "../layouts/Layout.astro";
         letter-spacing: 2px;
         position: relative;
         overflow: hidden;
-        background: rgba(1, 31, 40, 0.3); /* Slight semi-transparent backing */
+
+        /* The Blur Effect */
+        background: rgba(1, 31, 40, 0.3);
         backdrop-filter: blur(5px);
     }
 
+    /* --- RESTORED GLOW --- */
     .choice:hover {
         background-color: white;
         color: #011f28;
@@ -109,9 +561,48 @@ import Layout from "../layouts/Layout.astro";
         box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
     }
 
-    @media (max-width: 600px) {
+    /* --- MOBILE ADJUSTMENTS --- */
+    @media (max-width: 768px) {
         .choices {
             flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .choice {
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        /* Enlarge Blobs for Portrait Mode so liquid fills screen */
+        .blob-1 {
+            width: 90vw;
+            height: 90vw;
+            top: -10%;
+            left: -10%;
+        }
+        .blob-2 {
+            width: 85vw;
+            height: 85vw;
+            bottom: -5%;
+            right: -5%;
+        }
+        .blob-5 {
+            width: 90vw;
+            height: 90vw;
+            top: 15%;
+            right: -15%;
+        }
+
+        /* Reduce Parallax speed on mobile so it doesn't shake too much */
+        .group-1 {
+            --parallax-speed: 10px;
+        }
+        .group-2 {
+            --parallax-speed: 15px;
+        }
+        .group-4 {
+            --parallax-speed: 20px;
         }
     }
 </style>

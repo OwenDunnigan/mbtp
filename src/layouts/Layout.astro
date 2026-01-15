@@ -21,18 +21,29 @@ import { ClientRouter } from "astro:transitions";
 		<ClientRouter />
 	</head>
 	<body>
-		<div class="blob-container" transition:persist>
-			<div class="blob blob-1"></div>
-			<div class="blob blob-2"></div>
-			<div class="blob blob-3"></div>
-			<div class="blob blob-4"></div>
-		</div>
 		<slot />
 		<script>
 			// Define transition logic in a robust way that survives re-runs
 			// We attach functions to window so we can reference them for removal
 
-			// @ts-ignore
+			declare global {
+				interface Window {
+					obsidianTransitionLogic: {
+						currentTransition: string;
+						cleanupTimer: NodeJS.Timeout | null;
+						handleBeforePreparation: (event: {
+							from: URL;
+							to: URL;
+							navigationType: string;
+						}) => void;
+						handleBeforeSwap: (event: {
+							newDocument: Document;
+						}) => void;
+						handlePageLoad: () => void;
+					};
+				}
+			}
+
 			if (!window.obsidianTransitionLogic) {
 				window.obsidianTransitionLogic = {
 					currentTransition: "",
@@ -124,7 +135,7 @@ import { ClientRouter } from "astro:transitions";
 			}
 
 			// Remove existing listeners to prevent stacking
-			const logic = (window as any).obsidianTransitionLogic;
+			const logic = window.obsidianTransitionLogic;
 			document.removeEventListener(
 				"astro:before-preparation",
 				logic.handleBeforePreparation,
@@ -151,120 +162,6 @@ import { ClientRouter } from "astro:transitions";
 		</script>
 		<style is:global>
 			/* 3D Blob Animation Layer - Moved to Layout for persistence */
-			.blob-container {
-				position: fixed;
-				top: 0;
-				left: 0;
-				width: 100vw;
-				height: 100vh;
-				z-index: -1; /* Behind everything */
-				background-color: #011f28; /* Dark Blue */
-				overflow: hidden;
-				perspective: 1000px;
-				pointer-events: none; /* Let clicks pass through */
-			}
-
-			.blob {
-				position: absolute;
-				border-radius: 50%;
-				filter: blur(60px);
-				opacity: 0.7;
-				mix-blend-mode: screen;
-				animation-timing-function: ease-in-out;
-				animation-iteration-count: infinite;
-			}
-
-			.blob-1 {
-				width: 70vw;
-				height: 70vw;
-				background: #79b473; /* Green */
-				top: -20%;
-				left: -20%;
-				animation: float3d-1 15s infinite;
-			}
-
-			.blob-2 {
-				width: 60vw;
-				height: 60vw;
-				background: #f58904; /* Orange */
-				bottom: -20%;
-				right: -20%;
-				animation: float3d-2 18s infinite;
-			}
-
-			.blob-3 {
-				width: 50vw;
-				height: 50vw;
-				background: #6d6466; /* Grey/Purple-ish */
-				top: 30%;
-				left: 30%;
-				opacity: 0.5;
-				animation: float3d-3 20s infinite;
-			}
-
-			.blob-4 {
-				width: 40vw;
-				height: 40vw;
-				background: #011f28;
-				top: 10%;
-				right: 10%;
-				mix-blend-mode: overlay;
-				animation: float3d-4 25s infinite;
-			}
-
-			@keyframes float3d-1 {
-				0% {
-					transform: translate3d(0, 0, 0) scale(1);
-				}
-				33% {
-					transform: translate3d(50px, -50px, 100px) scale(1.1);
-				}
-				66% {
-					transform: translate3d(-30px, 40px, -50px) scale(0.9);
-				}
-				100% {
-					transform: translate3d(0, 0, 0) scale(1);
-				}
-			}
-
-			@keyframes float3d-2 {
-				0% {
-					transform: translate3d(0, 0, 0) scale(1);
-				}
-				33% {
-					transform: translate3d(-60px, 60px, -100px) scale(0.8);
-				}
-				66% {
-					transform: translate3d(40px, -30px, 50px) scale(1.1);
-				}
-				100% {
-					transform: translate3d(0, 0, 0) scale(1);
-				}
-			}
-
-			@keyframes float3d-3 {
-				0% {
-					transform: translate3d(0, 0, 0);
-				}
-				50% {
-					transform: translate3d(30px, 30px, 150px);
-				}
-				100% {
-					transform: translate3d(0, 0, 0);
-				}
-			}
-
-			@keyframes float3d-4 {
-				0% {
-					transform: translate3d(0, 0, 0);
-				}
-				50% {
-					transform: translate3d(-40px, -20px, -80px);
-				}
-				100% {
-					transform: translate3d(0, 0, 0);
-				}
-			}
 		</style>
 	</body>
 </html>

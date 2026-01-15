@@ -1,0 +1,61 @@
+---
+import Layout from "./Layout.astro";
+---
+
+<Layout title="Must Be The Place - Dinner">
+    <nav transition:persist>
+        <!-- <a href="/dinner/specials">Goods & Services</a> -->
+        <a href="/dinner/merch">Merch</a>
+        <!-- <a href="/dinner/about">About</a> -->
+        <a class="directions" href="https://maps.app.goo.gl/KHuusXZW7TB8BsHW7"
+            >Directions</a
+        >
+    </nav>
+
+    <slot />
+</Layout>
+
+<style>
+    nav {
+        position: fixed;
+        padding-left: 17% !important;
+        padding-top: 2.5%;
+        z-index: 100;
+    }
+
+    .directions {
+        right: 0px;
+        position: fixed;
+        margin-right: 17%;
+    }
+
+    a {
+        padding: 2px 0px;
+        text-decoration: none;
+        color: white; /* Explicitly set to white for dinner theme */
+        font-size: 1em;
+        border-bottom: ridge 1px;
+        margin: 0 10px;
+    }
+
+    @media (max-width: 900px) {
+        nav {
+            justify-self: anchor-center;
+            padding-left: 0% !important;
+        }
+
+        .directions {
+            position: fixed;
+            bottom: 15vh;
+            transform: translateX(-100%);
+            padding: 10px 20px;
+            border: solid 2px white;
+            margin: 0px;
+            /* Ensure it sits above other content if needed, though z-index is handled by nav usually */
+        }
+
+        a {
+            border-top: ridge 1px;
+        }
+    }
+</style>

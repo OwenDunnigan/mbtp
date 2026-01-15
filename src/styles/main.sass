@@ -1,264 +1,122 @@
 html, body
     margin: 0
+    padding: 0
     color: white
+    background-color: #011f28
     font-size: 22px
-    
-h1 
-    color: rgb(31 58 77 / 97%)
-    position: absolute
-    top: 50%
-    left: 50%
-    transform: translate(-50%, -50%)
-    margin: 0
-    text-align: center
-    width: 100%
-    font-size: clamp(5em, 34vw, 7em)
+    overflow-x: hidden
+    max-width: 100vw
 
-nav
-    position: fixed
-    padding-left: 17%
-    padding-top: 2.5%
-    z-index: 100
-    .directions
-        right: 0px
-        position: fixed
-        margin-right: 17%
-    a
-        padding: 2px 0px
-        text-decoration: none
-        color: inherit
-        font-size: 1em
-        border-bottom: ridge 1px
-        margin: 0 10px
-
-.header
-    width: 100%
-    height: 100%
-    object-fit: cover
-    position: absolute
-    top: 0px
-
-.big 
-    position: absolute
-    width: 100vw
-    height: 100vh
-    z-index: -1
-
-.arrow
-    position: absolute
-    bottom: 2.5%
-    left: 50%
-    transform: translateX(-50%)
-    font-size: 1em
-    text-decoration: none
-    color: inherit
-    width: 2.5vmax
-
-.instagram
-    bottom: 4%
-    position: absolute
-    right: 6%
-    color: white
-    font-size: 1.5em
-    text-decoration: none
-
-.bottom 
-    background: linear-gradient(135deg, #170826, #140840)
-    position: relative
-    bottom: -100vh
-    padding: 30% 0% 0% 0%
- 
-
-h2
-    color: blue
-
-.parallax 
-  perspective: 1px
-  height: 100vh
-  overflow-x: hidden
-  overflow-y: auto
-
-.parallax__layer 
-  position: absolute
-  top: 0
-  right: 0
-  bottom: 0
-  left: 0
-
-.layer-front
-  transform: translateZ(0)
-  height: 100vh
-  width: 100vw
-  position: absolute
-
-.big
-  transform: translateZ(-1px)
-  scale: 2
-
-
-
-@media (max-width: 900px)
-    h1
-        z-index: -1
-
-    .bottom
-        padding: 20% 0 0 0
-
-    nav
-        justify-self: anchor-center
-        padding-left: 0%
-
-        .directions
-            position-area: center
-            padding: 5px 10px
-            border: solid 2px
-            margin: 0px
-        a
-            border-top: ridge 1px    
-    .arrow
-        /* Keep mobile behavior or reset? Assuming mobile behavior was intentional but fixing the position-area there too just in case */
-        left: auto
-        transform: none
-        right: 0px
-        bottom: 0px
-        padding-right: 2.5%
-        width: 6vmax
-    .taiz
-        width: 90vw
-        right: 42px
-        position: relative
-        padding-bottom: 10%
-    .pine
-        width: 85vw
-        float: right
-        padding-bottom: 6%
-        position: relative
-        left: 30px
-    .col
-        width: 80vw      
-        position: relative
-        left: 22px    
-    img
-        max-inline-size: inherit
-
-@media (min-width: 900px)
-    .bottom
-        text-align: center
-        padding: 10% 0 15% 0
-        img
-            max-inline-size: 24vmax
-            padding: 0 2%
 /* View Transitions */
 @keyframes fade-in
-  from
-    opacity: 0
-  to
-    opacity: 1
+    from
+        opacity: 0
+    to
+        opacity: 1
 
 @keyframes fade-out
-  from
-    opacity: 1
-  to
-    opacity: 0
+    from
+        opacity: 1
+    to
+        opacity: 0
 
 /* --- Advanced View Transitions --- */
 
-/* Fix: Targets html attribute. Increase duration to visualize it better */
-/* Fix: Targets html attribute. Increase duration to visualize it better */
+/* Fix: Targets html attribute */
 html[data-transition-to="lunch"]
-  &::view-transition-old(root)
-    animation: fade-out 0.8s cubic-bezier(0.7, 0, 0.3, 1) both !important
-    z-index: 1
-  &::view-transition-new(root)
-    animation: diamond-iris 1.5s cubic-bezier(0.83, 0, 0.17, 1) both !important
-    z-index: 10
-    mix-blend-mode: normal
-    background-color: #DED2CE
+    &::view-transition-old(root)
+        animation: fade-out 0.8s cubic-bezier(0.7, 0, 0.3, 1) both !important
+        z-index: 1
+    &::view-transition-new(root)
+        animation: diamond-iris 1.5s cubic-bezier(0.83, 0, 0.17, 1) both !important
+        z-index: 10
+        mix-blend-mode: normal
+        background-color: #DED2CE
 
 /* Reverse Lunch (Back to Home) */
 html[data-transition-to="lunch-back"]
-  &::view-transition-old(root)
-    animation: diamond-iris-reverse 1.2s cubic-bezier(0.83, 0, 0.17, 1) both !important
-    z-index: 10
-    background-color: #DED2CE
-  &::view-transition-new(root)
-    animation: fade-in 0.8s cubic-bezier(0.7, 0, 0.3, 1) both !important
-    z-index: 1
+    &::view-transition-old(root)
+        animation: diamond-iris-reverse 1.2s cubic-bezier(0.83, 0, 0.17, 1) both !important
+        z-index: 10
+        background-color: #DED2CE
+    &::view-transition-new(root)
+        animation: fade-in 0.8s cubic-bezier(0.7, 0, 0.3, 1) both !important
+        z-index: 1
 
 @keyframes diamond-iris
-  0%
-    clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%)
-  100%
-    clip-path: polygon(50% -100%, 150% 50%, 50% 200%, -50% 50%)
+    0%
+        clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%)
+    100%
+        clip-path: polygon(50% -100%, 150% 50%, 50% 200%, -50% 50%)
 
 @keyframes diamond-iris-reverse
-  0%
-    clip-path: polygon(50% -100%, 150% 50%, 50% 200%, -50% 50%)
-  100%
-    clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%)
+    0%
+        clip-path: polygon(50% -100%, 150% 50%, 50% 200%, -50% 50%)
+    100%
+        clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%)
 
 
 /* DINNER TRANSITION - THE DEEP ABYSS */
 html[data-transition-to="dinner"]
-  &::view-transition-old(root)
-    animation: abyss-exit 1.5s cubic-bezier(0.7, 0, 0.3, 1) both !important
-    z-index: 10 /* Exit happens on top (flying past) */
-    transform-origin: center center
-  &::view-transition-new(root)
-    animation: abyss-enter 1.5s cubic-bezier(0.7, 0, 0.3, 1) both !important
-    z-index: 1
-    background-color: #02040a /* Deep Ink Blue */
+    &::view-transition-old(root)
+        animation: abyss-exit 1.5s cubic-bezier(0.7, 0, 0.3, 1) both !important
+        z-index: 10
+        transform-origin: center center
+    &::view-transition-new(root)
+        animation: abyss-enter 1.5s cubic-bezier(0.7, 0, 0.3, 1) both !important
+        z-index: 1
+        background-color: #02040a
 
 /* Reverse Dinner (Back to Home) */
 html[data-transition-to="dinner-back"]
-  &::view-transition-old(root)
-    animation: abyss-exit-reverse 1.5s cubic-bezier(0.7, 0, 0.3, 1) both !important
-    z-index: 1
-    background-color: #02040a
-  &::view-transition-new(root)
-    animation: abyss-enter-reverse 1.5s cubic-bezier(0.7, 0, 0.3, 1) both !important
-    z-index: 10
+    &::view-transition-old(root)
+        animation: abyss-exit-reverse 1.5s cubic-bezier(0.7, 0, 0.3, 1) both !important
+        z-index: 1
+        background-color: #02040a
+    &::view-transition-new(root)
+        animation: abyss-enter-reverse 1.5s cubic-bezier(0.7, 0, 0.3, 1) both !important
+        z-index: 10
 
 @keyframes abyss-exit
-  0%
-    transform: scale(1)
-    opacity: 1
-    filter: blur(0px)
-  100%
-    transform: scale(5)
-    opacity: 0
-    filter: blur(20px)
+    0%
+        transform: scale(1)
+        opacity: 1
+        filter: blur(0px)
+    100%
+        transform: scale(5)
+        opacity: 0
+        filter: blur(20px)
 
 @keyframes abyss-enter
-  0%
-    transform: scale(0.4)
-    opacity: 0
-    filter: blur(10px)
-  40%
-    opacity: 1
-  100%
-    transform: scale(1)
-    opacity: 1
-    filter: blur(0px)
+    0%
+        transform: scale(0.4)
+        opacity: 0
+        filter: blur(10px)
+    40%
+        opacity: 1
+    100%
+        transform: scale(1)
+        opacity: 1
+        filter: blur(0px)
 
 @keyframes abyss-exit-reverse
-  0%
-    transform: scale(1)
-    opacity: 1
-    filter: blur(0px)
-  100%
-    transform: scale(0.4)
-    opacity: 0
-    filter: blur(10px)
+    0%
+        transform: scale(1)
+        opacity: 1
+        filter: blur(0px)
+    100%
+        transform: scale(0.4)
+        opacity: 0
+        filter: blur(10px)
 
 @keyframes abyss-enter-reverse
-  0%
-    transform: scale(5)
-    opacity: 0
-    filter: blur(20px)
-  40%
-    opacity: 1
-  100%
-    transform: scale(1)
-    opacity: 1
-    filter: blur(0px)
+    0%
+        transform: scale(5)
+        opacity: 0
+        filter: blur(20px)
+    40%
+        opacity: 1
+    100%
+        transform: scale(1)
+        opacity: 1
+        filter: blur(0px)

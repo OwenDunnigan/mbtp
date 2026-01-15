@@ -1,172 +1,455 @@
 ---
-import Layout from "../../layouts/Layout.astro";
+import DinnerLayout from "../../layouts/DinnerLayout.astro";
 ---
 
-<Layout title="Must Be The Place">
+<DinnerLayout>
 	<div class="parallax">
-		<div class="parallax-layer layer-front">
-			<nav>
-				<a href="/dinner/specials">Goods & Services</a>
-				<a href="/dinner/merch">Merch</a>
-				<a href="/dinner/about">About</a>
-				<a
-					class="directions"
-					href="https://maps.app.goo.gl/KHuusXZW7TB8BsHW7"
-					>Directions</a
+		<!-- Background Layer (Deep Z) -->
+		<div class="parallax-layer layer-back">
+			<img src="/img/big.gif" class="header-bg" />
+		</div>
+
+		<!-- Base Layer (Content at Z=0, Scrolling) -->
+		<div class="parallax-layer layer-base">
+			<div class="dinner-hero">
+				<!-- Nav is now in DinnerLayout -->
+				<h1>
+					Must Be The
+					<span class="cube-wrapper">
+						<span class="cube">
+							<span class="face front">Place</span>
+							<span class="face bottom">Dinner</span>
+							<span class="face back">Drinks</span>
+							<span class="face top">Dessert</span>
+						</span>
+					</span>
+				</h1>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 -960 960 960"
+					fill="#e8eaed"
+					class="arrow"
+					><path
+						d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"
+					></path></svg
 				>
-			</nav>
-			<h1>Must Be The Place</h1>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				viewBox="0 -960 960 960"
-				fill="#e8eaed"
-				class="arrow"
-				><path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"
-				></path></svg
-			>
-			<div class="tumbler-wrapper">
-				<div class="tumbler-list" id="tumbler-list">
-					<!-- Words populate via JS -->
-				</div>
+			</div>
+
+			<div class="dinner-content">
+				<img class="taiz" src="/img/img1.jpg" />
+				<img class="pine" src="/img/img2.jpg" />
+				<img class="col" src="/img/img5.jpg" />
+				<a
+					class="instagram"
+					href="https://www.instagram.com/mustbetheplacewpg/"
+					>Instagram</a
+				>
 			</div>
 		</div>
-		<div class="parallax-layer big">
-			<img src="/img/big.gif" class="header" />
-		</div>
-		<div class="parallax-layer bottom">
-			<img class="taiz" src="/img/img1.jpg" />
-			<img class="pine" src="/img/img2.jpg" />
-			<img class="col" src="/img/img5.jpg" />
-			<a
-				class="instagram"
-				href="https://www.instagram.com/mustbetheplacewpg/">Instagram</a
-			>
-		</div>
 	</div>
-</Layout>
+</DinnerLayout>
 
 <script>
 	import Papa from "papaparse";
 
-	// Global cache key
 	const CACHE_KEY = "dinnerDataCache";
 
-	function shuffleArray(array) {
-		for (let i = array.length - 1; i > 0; i--) {
-			const j = Math.floor(Math.random() * (i + 1));
-			[array[i], array[j]] = [array[j], array[i]];
-		}
-		return array;
-	}
+	/* --- 3D CUBE ANIMATION --- */
 
-	async function initTumbler() {
-		const listContainer = document.getElementById("tumbler-list");
-		if (!listContainer) return;
-
-		let words = [];
-
-		// Check global cache
+	// Fetch Words
+	async function loadWords() {
 		// @ts-ignore
-		if (window[CACHE_KEY]) {
-			// @ts-ignore
-			words = window[CACHE_KEY];
-		} else {
-			// Fetch and parse
-			try {
-				const response = await fetch("/dinner_data.csv");
-				const csvText = await response.text();
-				const result = Papa.parse(csvText, {
-					header: true,
-					skipEmptyLines: true,
-				});
-				// Extract "Descriptor" column
-				words = result.data
-					.map((row) => row["Descriptor"])
-					.filter((w) => w);
+		if (window[CACHE_KEY]) return window[CACHE_KEY];
 
-				// Cache it
-				// @ts-ignore
-				window[CACHE_KEY] = words;
-			} catch (err) {
-				console.error("Failed to load dinner data", err);
-				// Fallback
-				words = ["Bar", "Dinner", "Nachos", "Date", "Cocktails"];
-			}
-		}
-
-		// Randomize
-		const shuffled = shuffleArray([...words]); // Copy before shuffle if we want fresh random on each nav, or shuffle once? User asked for randomness.
-		// Let's create a long list for scrolling (duplicate the shuffled list a few times)
-		const displayList = [...shuffled, ...shuffled, ...shuffled];
-
-		// Render
-		listContainer.innerHTML = displayList
-			.map((word) => `<div class="word">${word}</div>`)
-			.join("");
-
-		setupScrollSync();
-	}
-
-	function setupScrollSync() {
-		const parallax = document.querySelector(".parallax");
-		const list = document.getElementById("tumbler-list");
-
-		if (parallax && list) {
-			parallax.addEventListener("scroll", () => {
-				const scrollTop = parallax.scrollTop;
-				// Move the list up as we scroll down
-				const offset = scrollTop * 0.5;
-				list.style.transform = `translateY(-${offset}px)`;
+		try {
+			const response = await fetch(
+				import.meta.env.PUBLIC_CSV_DATA_URL_DINNER,
+			);
+			const csvText = await response.text();
+			const result = Papa.parse(csvText, {
+				header: true,
+				skipEmptyLines: true,
 			});
+			const words = result.data
+				.map((row: any) => row["Descriptors"])
+				.filter((w: any) => w && w.trim().length > 0);
+
+			if (words.length === 0) throw new Error("No valid words found");
+
+			// @ts-ignore
+			window[CACHE_KEY] = words;
+			return words;
+		} catch (err) {
+			console.error("Failed to load dinner data", err);
+			return ["Place", "Dinner", "Drinks", "Dessert", "Vibes"];
 		}
 	}
 
-	document.addEventListener("astro:page-load", initTumbler);
+	async function startCube() {
+		let words = await loadWords();
+		// Fallback again just in case
+		if (!words || words.length === 0)
+			words = ["Place", "Dinner", "Drinks", "Dessert"];
+
+		const cube = document.querySelector(".cube") as HTMLElement;
+		const faces = Array.from(
+			cube.querySelectorAll(".face"),
+		) as HTMLElement[];
+
+		// Find the scrolling container.
+		// Note: The parallax container handles the scrolling.
+		const parallax = document.querySelector(".parallax");
+
+		if (!cube || faces.length < 4 || !parallax) return;
+
+		// Scroll Sensitivity - degrees per pixel
+		const ROTATION_SPEED = 3;
+		// Deadzone - pixels before rotation starts
+		const SCROLL_DEADZONE = 0;
+
+		const updateCube = () => {
+			const scrollTop = parallax.scrollTop || 0;
+
+			// Apply deadzone: rotation stays at 0 until we scroll past DEADZONE
+			const effectiveScroll = Math.max(0, scrollTop - SCROLL_DEADZONE);
+			const rotation = effectiveScroll * ROTATION_SPEED;
+
+			// Apply rotation
+			cube.style.transform = `rotateX(${rotation}deg)`;
+
+			// Calculate step index based on 90 degree increments
+			// rotation 0 -> step 0 (0-45 deg)
+			const stepIndex = Math.floor((rotation + 45) / 90);
+			const activeFaceIndex = stepIndex % 4; // 0, 1, 2, 3
+
+			faces.forEach((face, i) => {
+				// Determine the offset of this face relative to the active face
+				let offset = i - activeFaceIndex;
+
+				// Adjust for wrapping (since it's a cycle of 4)
+				if (offset === -3) offset = 1;
+				if (offset === 3) offset = -1;
+
+				// Calculate which word we should show
+				let targetWordIndex = (stepIndex + offset) % words.length;
+				if (targetWordIndex < 0) targetWordIndex += words.length;
+
+				// Only update text content if it changes
+				if (face.textContent !== words[targetWordIndex]) {
+					face.textContent = words[targetWordIndex];
+				}
+
+				// Style Update via Classes
+				// Reset classes first
+				face.classList.remove(
+					"active-primary",
+					"active-secondary",
+					"neighbor",
+					"hidden",
+				);
+
+				if (offset === 0) {
+					// Active face
+					if (targetWordIndex === 0) {
+						// First word ("Place") -> Blue
+						face.classList.add("active-primary");
+					} else {
+						// Other words -> Grey but visible
+						face.classList.add("active-secondary");
+					}
+				} else if (Math.abs(offset) === 1) {
+					// Immediate neighbors (Top/Bottom) - Visible but dim
+					face.classList.add("neighbor");
+				} else {
+					// Back face - Hide completely
+					face.classList.add("hidden");
+				}
+			});
+		};
+
+		// Initial update immediately
+		updateCube();
+
+		// Bind scroll
+		parallax.addEventListener("scroll", updateCube);
+	}
+
+	document.addEventListener("astro:page-load", startCube);
 </script>
 
 <style>
-	.tumbler-wrapper {
-		position: absolute;
-		top: 58%;
-		left: 75%;
-		transform: translateX(-50%);
-		height: 200px; /* Increased height to show more flow */
+	/* Parallax Container */
+	.parallax {
+		height: 100vh;
 		width: 100%;
-		overflow: hidden;
-		text-align: center;
-		pointer-events: none;
-		z-index: 2;
-
-		/* Gradient Mask for fading out top and bottom */
-		mask-image: linear-gradient(
-			to bottom,
-			transparent 0%,
-			black 20%,
-			black 80%,
-			transparent 100%
-		);
-		-webkit-mask-image: linear-gradient(
-			to bottom,
-			transparent 0%,
-			black 20%,
-			black 80%,
-			transparent 100%
-		);
+		perspective: 1px;
+		overflow-x: hidden;
+		overflow-y: auto;
+		scroll-behavior: smooth;
 	}
 
-	.tumbler-list {
+	.parallax-layer {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+	}
+
+	/* Background Layer (Deep Z) */
+	.layer-back {
+		transform: translateZ(-1px) scale(2);
+		z-index: 0;
+		height: 100vh; /* Fixed height for visual anchor */
+	}
+
+	.header-bg {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	/* Base Layer (Content Flow) */
+	.layer-base {
+		transform: translateZ(0);
+		z-index: 1;
+		height: auto;
+		min-height: 100vh;
+	}
+
+	/* Hero Section */
+	.dinner-hero {
+		height: 100vh;
+		width: 100%;
 		display: flex;
 		flex-direction: column;
+		justify-content: center;
 		align-items: center;
-		padding-top: 80px; /* Push first item into visible zone */
+		position: relative;
 	}
 
-	.word {
-		font-size: 5rem;
-		line-height: 80px; /* Adjusted for larger font */
-		color: rgba(255, 255, 255, 0.4);
-		font-weight: 300;
+	.dinner-content {
+		background-color: #011f28;
+	}
+	/* Hero Text */
+	h1 {
+		color: rgba(31, 58, 77, 0.97); /* Safer syntax */
+		text-align: center;
+		font-size: clamp(
+			3em,
+			16vw,
+			7em
+		); /* Slightly reduced min/max to fit single line */
+		margin: 0;
+		position: relative;
+		z-index: 2;
+		line-height: normal;
+		/* Removed transform-style: preserve-3d from here to fix blurriness on parent text */
+		display: flex;
+		flex-direction: row; /* Changed from column to row */
+		flex-wrap: wrap; /* Allow wrapping if necessary */
+		justify-content: center;
+		align-items: center;
+		/* gap handled by user edit, but let's be safe */
+		width: 100%;
+		bottom: -10vh;
+	}
+
+	/* --- 3D ROTATING TEXT --- */
+	.cube-wrapper {
+		/* Use CSS Grid for robust centering */
+		display: inline-block; /* Inline for row layout */
+		width: 3ch; /* Approximate width for "Place" */
+		height: 1.1em;
+		perspective: 1000px;
+		position: relative;
+		text-align: left; /* Left align wrapper */
+		margin-left: 0.25em; /* Add some spacing manually since gap was removed/questionable */
+	}
+
+	.cube {
+		width: 100%;
+		height: 100%;
+		position: absolute;
+		transform-style: preserve-3d;
+		transform-origin: center center; /* Fixed axis to geometric center */
+		/* No transition - controlled by scroll directly */
+		will-change: transform; /* Hint for performance */
+	}
+
+	.face {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		backface-visibility: hidden; /* Hide back faces */
+		text-align: left; /* Left align text */
+		white-space: nowrap;
+		display: flex;
+		align-items: center;
+		justify-content: flex-start; /* Start flex items from left */
+		background: transparent;
+		font-weight: bold;
+		/* Improve text rendering */
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		/* Transitions for state changes */
+		transition:
+			opacity 0.2s ease,
+			color 0.2s ease,
+			filter 0.2s ease;
+	}
+
+	/* CSS Defaults for Initial Load Stability */
+	/* Active (Front) defaults */
+	.front {
+		transform: translateZ(0.55em);
+	}
+
+	/* Bottom Face (-90deg relative to view) */
+	.bottom {
+		transform: rotateX(-90deg) translateZ(0.55em);
+	}
+
+	/* Back Face (180deg) */
+	.back {
+		transform: rotateX(180deg) translateZ(0.55em);
+	}
+
+	/* Top Face (90deg relative to view) */
+	.top {
+		transform: rotateX(90deg) translateZ(0.55em);
+	}
+
+	/* STATES */
+
+	/* Active State - PRIMARY (First Word / Place) */
+	.face.active-primary,
+	.front {
+		opacity: 1;
+		color: rgba(31, 58, 77, 0.97);
+		z-index: 10;
+		filter: none;
+	}
+
+	/* Active State - SECONDARY (Other Words) */
+	.face.active-secondary {
+		opacity: 1;
+		color: #808080 !important;
+		z-index: 10;
+		filter: none;
+	}
+
+	/* Neighbor State */
+	.face.neighbor,
+	.bottom,
+	.top {
+		opacity: 0.5;
+		color: #808080 !important; /* Explicit grey */
+		z-index: 1;
+		filter: blur(0.5px);
+	}
+
+	/* Hidden State */
+	.face.hidden,
+	.back {
+		opacity: 0;
+		color: transparent;
+		z-index: 0;
+	}
+
+	.arrow {
+		position: absolute;
+		bottom: 5vh;
+		width: 40px;
+		height: 40px;
+		animation: bounce 2s infinite;
+	}
+
+	@keyframes bounce {
+		0%,
+		20%,
+		50%,
+		80%,
+		100% {
+			transform: translateY(0);
+		}
+		40% {
+			transform: translateY(-10px);
+		}
+		60% {
+			transform: translateY(-5px);
+		}
+	}
+
+	/* Media Queries for Images (retaining some flavor of original) */
+	@media (max-width: 900px) {
+		h1 {
+			flex-direction: column;
+		}
+		.cube-wrapper {
+			margin-left: 0;
+			width: 100%;
+			text-align: center;
+		}
+		.cube {
+			left: 0%;
+		}
+		.face {
+			justify-content: center;
+		}
+		.taiz {
+			transform: rotate(-2deg);
+		}
+		.pine {
+			transform: rotate(3deg);
+		}
+		.col {
+			transform: rotate(-1deg);
+		}
+
+		.dinner-content img {
+			max-width: 75vw;
+			margin-bottom: -10%;
+		}
+
+		.dinner-content img:nth-child(2) {
+			left: 40%;
+			position: relative;
+		}
+		.instagram {
+			margin: 3.25rem 4rem;
+		}
+	}
+
+	@media (min-width: 900px) {
+		.dinner-content {
+			flex-direction: row;
+			flex-wrap: wrap;
+			justify-content: center;
+			align-items: center;
+			padding: 10% 5%;
+			text-align: -webkit-center;
+		}
+		.dinner-content img {
+			width: 30%;
+		}
+	}
+
+	.instagram {
+		display: inline-block;
+		margin: 1rem;
+		padding: 10px 25px;
+		border: 1px solid rgba(31, 58, 77, 0.8);
+		color: rgba(31, 58, 77, 1);
+		text-decoration: none;
+		font-size: 1.2rem;
+		transition: all 0.3s ease;
 		text-transform: uppercase;
-		letter-spacing: 0.5em;
+		letter-spacing: 1px;
+	}
+
+	.instagram:hover {
+		background: rgba(31, 58, 77, 0.1);
+		letter-spacing: 2px;
 	}
 </style>

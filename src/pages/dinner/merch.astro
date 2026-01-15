@@ -1,51 +1,238 @@
 ---
-import Layout from "../../layouts/Layout.astro";
+import DinnerLayout from "../../layouts/DinnerLayout.astro";
+
+import fs from "node:fs";
+import path from "node:path";
+
+// Get filenames from public/img/stickers
+const stickerDir = path.join(process.cwd(), "public/img/stickers");
+
+interface StickerImage {
+    default: {
+        src: string;
+    };
+}
+
+let stickerFiles: StickerImage[] = [];
+
+try {
+    if (fs.existsSync(stickerDir)) {
+        const files = fs.readdirSync(stickerDir);
+        stickerFiles = files
+            .filter((file) => /\.(png|jpg|jpeg|svg)$/i.test(file))
+            .map((file) => ({
+                default: { src: `/img/stickers/${file}` },
+            }));
+    }
+} catch (e) {
+    console.error("Could not read stickers directory", e);
+}
 ---
 
-<Layout title="Merch">
-    <nav>
-        <a href="/dinner/specials">Goods & Services</a>
-        <a href="/dinner/merch">Merch</a>
-        <a href="/dinner">Home</a>
-        <a class="directions" href="https://maps.app.goo.gl/KHuusXZW7TB8BsHW7"
-            >Directions</a
-        >
-    </nav>
+<DinnerLayout>
+    <DinnerLayout>
+        <div class="locker-room">
+            <!-- The Locker Container -->
+            <div class="locker-body">
+                <!-- Vents (Visual only) -->
+                <div class="vents">
+                    <span></span><span></span><span></span><span></span>
+                </div>
 
-    <div class="container">
-        <h1>We have merch!</h1>
-        <p>
-            Between hand printed yearly exclusive shirts and rotating custom
-            stickers for all sorts of things, we have a variety of merch for you
-            to choose from. Stop in to check out if we have anything special for
-            the week!
-        </p>
-        <p>
-            Big thanks to <a href="https://www.instagram.com/_erikjean/">
-                Erik
-            </a> who prints our shirts &lt;3
-        </p>
-        <p>
-            Note: most of our merch has a limited release and we do not keep
-            extra stock from designs prior. If you see something you like, its a
-            good idea to buy it before its gone and lost to the sands of time.
-        </p>
-    </div>
-</Layout>
+                <!-- Main Door Surface -->
+                <div class="door-surface" id="sticker-zone">
+                    <!-- T-Shirt (Focal Point) - Fixed Position -->
+                    <div class="merch-item t-shirt-display">
+                        <div class="tape-strip top"></div>
+                        <img src="/img/img2.jpg" alt="Exclusive T-Shirt" />
+                        <div class="merch-tag">
+                            <h3>Club Tee</h3>
+                            <p>$35.00</p>
+                        </div>
+                    </div>
 
-<style lang="sass">
-    nav
-        padding: 1rem
-        text-align: center
-        a
-            color: white
-            margin: 0 1rem
-            text-decoration: none
+                    <!-- Stickers will be injected here by JS, or we render them server side and randomize via JS -->
+                    {
+                        stickerFiles.map((sticker) => (
+                            <img
+                                src={sticker.default.src}
+                                class="sticker"
+                                alt="Sticker"
+                                loading="eager"
+                            />
+                        ))
+                    }
+                </div>
 
-    .container
-        text-align: center
-        padding: 2rem
-        font-size: 18px
-        max-width: 800px
-        margin: 0 auto
-</style>
+                <div class="lock-mechanism"></div>
+            </div>
+        </div>
+    </DinnerLayout>
+
+    <script>
+        function setupStickerBomb() {
+            const stickers = document.querySelectorAll(".sticker");
+            const container = document.getElementById("sticker-zone");
+
+            if (!container || stickers.length === 0) return;
+
+            const containerRect = container.getBoundingClientRect();
+
+            stickers.forEach((sticker) => {
+                const el = sticker as HTMLElement;
+
+                // Random Position (0% to 90% to keep mostly inside)
+                const randomX = Math.random() * 85;
+                const randomY = Math.random() * 85;
+
+                // Random Rotation (-45deg to 45deg)
+                const randomRot = (Math.random() - 0.5) * 90;
+
+                // Random Scale (0.8 to 1.2)
+                const randomScale = 0.8 + Math.random() * 0.4;
+
+                el.style.left = `${randomX}%`;
+                el.style.top = `${randomY}%`;
+                el.style.transform = `rotate(${randomRot}deg) scale(${randomScale})`;
+
+                // Random Z-index but below the T-shirt (which we'll set to z-index 10)
+                el.style.zIndex = Math.floor(Math.random() * 5).toString();
+
+                // Show it now that it's positioned
+                el.style.opacity = "1";
+            });
+        }
+
+        // Run on load and View Transitions
+        document.addEventListener("astro:page-load", setupStickerBomb);
+    </script>
+
+    <style lang="sass">
+        .locker-room
+            min-height: 100vh
+            display: flex
+            justify-content: center
+            align-items: center
+            background-color: #05070a
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E")
+            padding: 80px 20px
+
+        .locker-body
+            width: 100%
+            max-width: 500px
+            height: 80vh
+            background-color: #1a1c21
+            border: 4px solid #0f1013
+            border-radius: 12px
+            position: relative
+            box-shadow: inset 10px 0 40px rgba(0,0,0,0.8), 20px 20px 60px rgba(0,0,0,0.5)
+            display: flex
+            flex-direction: column
+            overflow: hidden
+
+        /* Vents at top of locker */
+        .vents
+            height: 60px
+            display: flex
+            flex-direction: column
+            gap: 6px
+            padding: 20px 40px
+            opacity: 0.3
+
+            span
+                display: block
+                height: 6px
+                width: 100%
+                background: #000
+                border-radius: 4px
+                box-shadow: 0 1px 0 rgba(255,255,255,0.1)
+
+        .door-surface
+            flex: 1
+            position: relative
+            /* No overflow hidden so stickers can peek? strict locker means keep inside */
+            overflow: hidden
+
+        /* The T-Shirt Display */
+        .merch-item
+            position: absolute
+            top: 25%
+            left: 50%
+            transform: translateX(-50%) rotate(-2deg)
+            width: 250px
+            z-index: 20 !important /* Always on top of stickers */
+            background: #fff
+            padding: 10px
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5)
+            transition: transform 0.3s ease
+
+            &:hover
+                transform: translateX(-50%) rotate(0deg) scale(1.05)
+                z-index: 30
+
+            img
+                width: 100%
+                display: block
+                filter: contrast(1.1)
+
+        .merch-tag
+            position: absolute
+            bottom: -20px
+            right: -10px
+            background: #ffcc00
+            color: #000
+            padding: 5px 15px
+            transform: rotate(-5deg)
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3)
+            font-family: 'Courier New', monospace
+
+            h3
+                margin: 0
+                font-size: 1rem
+                font-weight: 800
+                text-transform: uppercase
+
+            p
+                margin: 0
+                font-size: 0.9rem
+                font-weight: bold
+
+        /* Tape visual */
+        .tape-strip
+            position: absolute
+            height: 30px
+            width: 100px
+            background: rgba(255, 255, 255, 0.4)
+            top: -15px
+            left: 50%
+            transform: translateX(-50%) rotate(2deg)
+            backdrop-filter: blur(2px)
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2)
+            z-index: 10
+
+        /* Stickers */
+        .sticker
+            position: absolute
+            width: 100px
+            height: auto
+            object-fit: contain
+            opacity: 0 /* Hidden until JS places them */
+            transition: opacity 0.5s ease, transform 0.3s ease
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3))
+            cursor: pointer
+
+            &:hover
+                z-index: 25 !important
+                filter: drop-shadow(5px 10px 15px rgba(0,0,0,0.5)) brightness(1.1)
+
+        .lock-mechanism
+            position: absolute
+            right: 15px
+            top: 50%
+            width: 20px
+            height: 60px
+            background: #0a0b0d
+            border-radius: 4px
+            box-shadow: inset 2px 2px 5px #000
+    </style>
+</DinnerLayout>

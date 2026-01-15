@@ -1,17 +1,8 @@
 ---
-import Layout from "../../layouts/Layout.astro";
+import DinnerLayout from "../../layouts/DinnerLayout.astro";
 ---
 
-<Layout title="Goods & Services">
-    <nav>
-        <a href="/dinner/specials">Goods & Services</a>
-        <a href="/dinner/merch">Merch</a>
-        <a href="/dinner">Home</a>
-        <a class="directions" href="https://maps.app.goo.gl/KHuusXZW7TB8BsHW7"
-            >Directions</a
-        >
-    </nav>
-
+<DinnerLayout>
     <div class="about">
         <span
             >Our Drink and Food menu constantly rotates with a regular feature
@@ -53,22 +44,9 @@ import Layout from "../../layouts/Layout.astro";
             <h2>Diversions & Eclectic Encounters</h2>
         </div>
     </div>
-</Layout>
+</DinnerLayout>
 
 <style lang="sass">
-    nav
-        position: fixed
-        top: 0
-        width: 100%
-        background: rgba(0, 0, 0, 0.8)
-        padding: 1rem
-        text-align: center
-        z-index: 1000
-        a
-            color: white
-            margin: 0 1rem
-            text-decoration: none
-
     figure
         img
             height: 69vh

@@ -1,20 +1,10 @@
 ---
-import Layout from "../../layouts/Layout.astro";
+import DinnerLayout from "../../layouts/DinnerLayout.astro";
 import ParallaxKitty from "../../components/ParallaxKitty.astro";
 ---
 
-<Layout title="About">
+<DinnerLayout>
     <div class="content-wrapper">
-        <nav>
-            <a href="/dinner/specials">Goods & Services</a>
-            <a href="/dinner/merch">Merch</a>
-            <a href="/dinner">Home</a>
-            <a
-                class="directions"
-                href="https://maps.app.goo.gl/KHuusXZW7TB8BsHW7">Directions</a
-            >
-        </nav>
-
         <h1>About</h1>
         <div class="text-content">
             <p>
@@ -54,7 +44,7 @@ import ParallaxKitty from "../../components/ParallaxKitty.astro";
             height="60vh"
         />
     </div>
-</Layout>
+</DinnerLayout>
 
 <style>
     .content-wrapper {
@@ -72,15 +62,5 @@ import ParallaxKitty from "../../components/ParallaxKitty.astro";
     .text-content {
         margin-bottom: 2rem;
         line-height: 1.6;
-    }
-    nav {
-        top: 0;
-        left: 0;
-        padding: 1rem;
-        position: fixed;
-        width: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        z-index: 1000;
-        text-align: center;
     }
 </style>

@@ -22,7 +22,3 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
-
-# dependencies (could show vulnerabilities)
-package-lock.json
-package.json
